@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperação UC8 - Banco de Dados para Web | Senac</title>
+    <link rel="icon" type="image/png" href="logo-senac.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-card-hover: rgba(24, 33, 53, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --senac-blue-raw: 210, 100%, 25%;
+            --senac-blue: hsl(210, 100%, 28%);
+            --senac-blue-glow: hsla(210, 100%, 50%, 0.15);
+            --senac-orange: hsl(34, 90%, 52%);
+            --senac-orange-glow: hsla(34, 90%, 52%, 0.2);
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dimmed: #6b7280;
+            
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.15);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.15);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glow-shadow: 0 0 20px rgba(0, 69, 135, 0.2);
+            --orange-glow-shadow: 0 0 20px rgba(242, 145, 17, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(210, 100%, 15%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(34, 90%, 15%, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--senac-orange);
+        }
+
+        header {
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-symbol {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--senac-blue), var(--senac-orange));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: var(--glow-shadow);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--senac-orange);
+        }
+
+        .student-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .student-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--senac-orange);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--senac-orange);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .main-container {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        /* Sidebar Navigation & Tracker */
+        aside {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .aside-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .aside-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Circle styles */
+        .progress-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .progress-circle-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .progress-circle {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 10;
+        }
+
+        .progress-circle-fill {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 10;
+            stroke-dasharray: 408.4; /* 2 * PI * r (r=65) */
+            stroke-dashoffset: 408.4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .progress-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Steps navigation vertical list */
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item button {
+            width: 100%;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        .nav-item button:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .nav-item.active button {
+            background: var(--senac-blue-glow);
+            border-color: rgba(0, 69, 135, 0.4);
+            color: #38bdf8;
+            font-weight: 600;
+            box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05);
+        }
+
+        .nav-item.completed button .check-icon {
+            color: var(--success);
+            opacity: 1;
+        }
+
+        .nav-item button .check-icon {
+            opacity: 0.3;
+            transition: var(--transition);
+        }
+
+        /* Content Area */
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+        .step-number {
+            color: var(--senac-orange);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        /* Indicators mapping tags */
+        .indicator-mapping {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .indicator-tag {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag-orange {
+            background: var(--senac-orange-glow);
+            border: 1px solid rgba(242, 145, 17, 0.3);
+            color: #fb923c;
+        }
+
+        .tag-blue {
+            background: var(--senac-blue-glow);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+        }
+
+        .tag-indicator-alert {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            font-weight: 700;
+            margin-top: 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* General Typography */
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.8rem 0 1rem 0;
+            color: #f3f4f6;
+            font-weight: 600;
+            border-left: 3px solid var(--senac-orange);
+            padding-left: 10px;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        strong {
+            color: var(--text-main);
+        }
+
+        /* Step Checklist inside each tab */
+        .task-list {
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox:checked {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .task-checkbox:checked::after {
+            content: "✓";
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .task-label {
+            font-size: 1rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .task-item:hover .task-checkbox {
+            border-color: var(--senac-orange);
+        }
+
+        .task-item.checked .task-label {
+            color: var(--text-dimmed);
+            text-decoration: line-through;
+        }
+
+        /* Screenshot Upload Box Styles */
+        .upload-section {
+            background: rgba(255, 255, 255, 0.015);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .upload-section:hover {
+            border-color: var(--senac-orange);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .upload-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            background: var(--senac-orange);
+            border-color: var(--senac-orange);
+            color: white;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .upload-preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .upload-preview.active {
+            display: block;
+        }
+
+        .upload-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .upload-status.success {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Alert Callouts */
+        .alert-box {
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+
+        .alert-info {
+            background: var(--senac-blue-glow);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+        }
+
+        .alert-warning {
+            background: var(--warning-glow);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .alert-important {
+            background: var(--danger-glow);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .alert-box svg {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            margin-top: 2px;
+        }
+
+        .alert-content strong {
+            color: currentColor;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        /* Code snippets section */
+        .code-container {
+            margin: 1.5rem 0;
+            background: #060913;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .code-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .code-lang {
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-copy.copied {
+            background: var(--success-glow);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        pre {
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #38bdf8;
+            background: transparent;
+            padding: 0;
+        }
+
+        .code-keyword { color: #f472b6; }
+        .code-string { color: #34d399; }
+        .code-comment { color: #6b7280; font-style: italic; }
+        .code-type { color: #fbbf24; }
+        .code-function { color: #60a5fa; }
+
+        /* Video recommendations styling */
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .video-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            border-color: var(--senac-orange);
+            box-shadow: var(--orange-glow-shadow);
+        }
+
+        .video-thumbnail-placeholder {
+            width: 80px;
+            height: 50px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            flex-shrink: 0;
+        }
+
+        .video-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .video-duration {
+            font-size: 0.8rem;
+            color: var(--senac-orange);
+            font-weight: 500;
+        }
+
+        /* Database diagram CSS */
+        .db-schema-visual {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .db-schema-visual {
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: stretch;
+            }
+        }
+
+        .visual-table {
+            background: #0f172a;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            width: 240px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .visual-table-header {
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1.5px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-turma {
+            background: rgba(242, 145, 17, 0.15);
+            color: #fb923c;
+            border-color: rgba(242, 145, 17, 0.25);
+        }
+
+        .header-aluno {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+
+        .visual-table-row {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .visual-table-row:last-child {
+            border-bottom: none;
+        }
+
+        .col-name {
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+        }
+
+        .col-meta {
+            color: var(--text-dimmed);
+            font-size: 0.8rem;
+        }
+
+        .pk-col {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .fk-col {
+            color: #f472b6;
+            font-weight: 600;
+        }
+
+        .schema-relation-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            position: relative;
+            padding: 10px;
+        }
+
+        .schema-relation-line::before {
+            content: "";
+            position: absolute;
+            background: var(--text-dimmed);
+            opacity: 0.3;
+        }
+
+        @media (min-width: 768px) {
+            .schema-relation-line {
+                width: 80px;
+            }
+            .schema-relation-line::before {
+                width: 100%;
+                height: 2px;
+                left: 0;
+            }
+        }
+        @media (max-width: 767px) {
+            .schema-relation-line {
+                height: 40px;
+            }
+            .schema-relation-line::before {
+                height: 100%;
+                width: 2px;
+                top: 0;
+            }
+        }
+
+        /* Indicators Status Table */
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .indicators-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .indicators-grid .indicator-card:last-child {
+                grid-column: span 2;
+            }
+        }
+
+        .indicator-card {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .indicator-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--text-dimmed);
+            transition: var(--transition);
+        }
+
+        .indicator-card.completed::before {
+            background: var(--success);
+        }
+
+        .indicator-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .indicator-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .indicator-status-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: var(--danger-glow);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .status-completed {
+            background: var(--success-glow);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .indicator-desc {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .indicator-mapping-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            padding-top: 6px;
+        }
+
+        /* Tab Transition Utilities */
+        .tab-btn-wrapper {
+            position: relative;
+        }
+
+        .nav-item-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 8px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .nav-item.active .nav-item-icon {
+            background: var(--senac-orange);
+            color: white;
+        }
+
+        .nav-item.completed .nav-item-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .flex-align-center {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Next/Prev Tab Navigation buttons */
+        .stepper-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-step {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .btn-step:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+        }
+
+        .btn-step-primary {
+            background: var(--senac-orange);
+            border-color: var(--senac-orange);
+            color: white;
+        }
+
+        .btn-step-primary:hover {
+            background: hsl(34, 90%, 46%);
+            border-color: hsl(34, 90%, 46%);
+            box-shadow: 0 0 15px rgba(242, 145, 17, 0.3);
+        }
+
+        .btn-step:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Final Report Printable Section Preview */
+        .report-preview-container {
+            background: #ffffff;
+            color: #1e293b;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .report-preview-container.active {
+            display: block;
+        }
+
+        /* Print formatting */
+        @media print {
+            @page {
+                margin: 2cm;
+                size: A4 portrait;
+            }
+
+            body > * {
+                display: none !important;
+            }
+
+            #report-print-root {
+                display: block !important;
+            }
+
+            .print-page-break {
+                page-break-after: always;
+            }
+
+            .print-screenshot {
+                max-width: 100% !important;
+                max-height: 450px !important;
+                object-fit: contain;
+                border: 1px solid #ccc;
+                margin-top: 15px;
+            }
+        }
+
+        /* Footer styling */
+        footer {
+            background: rgba(11, 15, 25, 0.9);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4rem;
+        }
+
+        footer span {
+            color: var(--senac-orange);
+            font-weight: 600;
+        }
+
+        /* Responsive Layout adjustments */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            aside {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .aside-card {
+                flex: 1;
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+                padding: 1rem;
+            }
+            
+            .main-container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            aside {
+                flex-direction: column;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SVG Gradients for Progress Circle -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="hsl(210, 100%, 50%)" />
+            <stop offset="100%" stop-color="var(--senac-orange)" />
+        </linearGradient>
+    </svg>
+
+    <header>
+        <div class="logo-container">
+            <img src="logo-senac.png" alt="Logo Senac" style="height: 36px; width: auto; object-fit: contain;">
+            <div class="logo-text">Senac <span>Recuperação</span></div>
+        </div>
+        <div class="student-badge">
+            <div class="dot"></div>
+            Aluna: <strong>Raquele (Licença Maternidade)</strong>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
+        <!-- Navigation Sidebar -->
+        <aside>
+            <!-- Progress Tracker -->
+            <div class="aside-card progress-box">
+                <div class="aside-title">
+                    Seu Progresso
+                </div>
+                <div class="progress-circle-container">
+                    <svg class="progress-circle" viewBox="0 0 140 140">
+                        <circle class="progress-circle-bg" cx="70" cy="70" r="65" />
+                        <circle class="progress-circle-fill" id="progressFill" cx="70" cy="70" r="65" />
+                    </svg>
+                    <div class="progress-text" id="progressPct">0%</div>
+                </div>
+                <div class="progress-desc" id="progressText">Vamos começar, Raquele! Respeite seu tempo.</div>
+            </div>
+
+            <!-- Steps Menu -->
+            <div class="aside-card">
+                <div class="aside-title">
+                    Etapas do Guia
+                </div>
+                <ul class="nav-list">
+                    <li class="nav-item active" data-tab="welcome">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span>Início</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="step1" id="nav-step1">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">1</span>Passo 1: Modelagem</span>
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="step2" id="nav-step2">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">2</span>Passo 2: Servidor</span>
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="step3" id="nav-step3">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">3</span>Passo 3: SQL Físico</span>
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="step4" id="nav-step4">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">4</span>Passo 4: Conexão</span>
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="step5" id="nav-step5">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">5</span>Passo 5: CRUD PHP</span>
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" data-tab="delivery">
+                        <button>
+                            <span class="flex-align-center"><span class="nav-item-icon">&#9654;</span>Gerar Entrega</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main>
+            
+            <!-- Tab: Welcome -->
+            <div class="content-card active" id="tab-welcome">
+                <div class="card-header">
+                    <span class="step-number">Introdução</span>
+                    <h2 class="card-title">Olá, Raquele! 🌸</h2>
+                </div>
+                <p>Sabemos que você está passando por um momento muito especial e também desafiador com a chegada do seu bebê. Parabéns pela maternidade!</p>
+                <p>Este plano de recuperação da <strong>UC8 (Implementar Banco de Dados para Web)</strong> foi desenhado exclusivamente para você, com foco em <strong>praticidade, leveza e foco total nos indicadores mínimos</strong> para a sua aprovação. Fizemos tudo o mais simples e direto ao ponto possível para que caiba na sua nova rotina.</p>
+                
+                <div class="alert-box alert-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <div class="alert-content">
+                        <strong>Como funciona a Recuperação?</strong>
+                        Você irá desenvolver um único mini-projeto web em PHP integrado a um Banco de Dados MySQL (o <em>"Projeto Escola Simplificado"</em>). Cada etapa concluída e testada comprova que você domina um indicador da unidade curricular.
+                    </div>
+                </div>
+
+                <h3>Acompanhe seus Indicadores</h3>
+                <p>Nossa plataforma monitora as tarefas e imagens que você subir. Conforme você avança, os indicadores serão dados como <strong>Concluídos</strong>:</p>
+
+                <div class="indicators-grid">
+                    <div class="indicator-card" id="ind-card-1">
+                        <div class="indicator-head">
+                            <span class="indicator-title">Indicador 1</span>
+                            <span class="indicator-status-badge status-pending" id="ind-status-1">Pendente</span>
+                        </div>
+                        <div class="indicator-desc">Modelar a estrutura do Banco de Dados conforme requisitos de uma aplicação web.</div>
+                        <div class="indicator-mapping-info">Comprovado no <strong>Passo 1 (Modelagem)</strong></div>
+                    </div>
+                    
+                    <div class="indicator-card" id="ind-card-2">
+                        <div class="indicator-head">
+                            <span class="indicator-title">Indicador 2</span>
+                            <span class="indicator-status-badge status-pending" id="ind-status-2">Pendente</span>
+                        </div>
+                        <div class="indicator-desc">Preparar o ambiente de desenvolvimento, conforme requisitos do SGBD.</div>
+                        <div class="indicator-mapping-info">Comprovado no <strong>Passo 2 (Uniform Server)</strong></div>
+                    </div>
+
+                    <div class="indicator-card" id="ind-card-3">
+                        <div class="indicator-head">
+                            <span class="indicator-title">Indicador 3</span>
+                            <span class="indicator-status-badge status-pending" id="ind-status-3">Pendente</span>
+                        </div>
+                        <div class="indicator-desc">Estruturar banco de dados físico utilizando linguagem DDL e DML.</div>
+                        <div class="indicator-mapping-info">Comprovado no <strong>Passo 3 (SQL no phpMyAdmin)</strong></div>
+                    </div>
+
+                    <div class="indicator-card" id="ind-card-4">
+                        <div class="indicator-head">
+                            <span class="indicator-title">Indicador 4</span>
+                            <span class="indicator-status-badge status-pending" id="ind-status-4">Pendente</span>
+                        </div>
+                        <div class="indicator-desc">Integrar o banco de dados à aplicação web através do código PHP (PDO).</div>
+                        <div class="indicator-mapping-info">Comprovado no <strong>Passo 4 (Arquivo conexao.php)</strong></div>
+                    </div>
+
+                    <div class="indicator-card" id="ind-card-5">
+                        <div class="indicator-head">
+                            <span class="indicator-title">Indicador 5</span>
+                            <span class="indicator-status-badge status-pending" id="ind-status-5">Pendente</span>
+                        </div>
+                        <div class="indicator-desc">Manipular dados a partir da aplicação usando PHP (Selects, Joins e Inserts).</div>
+                        <div class="indicator-mapping-info">Comprovado no <strong>Passo 5 (Páginas do CRUD)</strong></div>
+                    </div>
+                </div>
+
+                <div class="stepper-nav">
+                    <div></div>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="step1">
+                        Iniciar Passo 1
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Step 1 (Modelagem) -->
+            <div class="content-card" id="tab-step1">
+                <div class="card-header">
+                    <span class="step-number">Passo 1</span>
+                    <h2 class="card-title">Modelagem de Banco de Dados</h2>
+                    <div class="indicator-mapping">
+                        <span class="indicator-tag tag-orange">Foca no Indicador 1</span>
+                    </div>
+                    <div class="tag-indicator-alert">
+                        Ao concluir estas tarefas e anexar o print, você estará <strong>concluindo o Indicador 1</strong>!
+                    </div>
+                </div>
+                <p>Antes de ir para o computador, precisamos desenhar como as informações se organizam. Para criar esse diagrama conceitual e lógico, você utilizará a ferramenta gratuita <strong>draw.io</strong> (disponível online em <a href="https://app.diagrams.net/" target="_blank" style="color: var(--senac-orange);">app.diagrams.net</a>).</p>
+                <p>Faremos um banco de dados para gerenciar uma <strong>Escola</strong>. Desenhe no draw.io <strong>2 tabelas</strong> relacionais para o nosso mini-projeto:</p>
+                <ul>
+                    <li><strong>Turma:</strong> Representa a entidade Turma (ex: "Desenvolvimento Web"). Uma turma pode ter vários alunos.</li>
+                    <li><strong>Aluno:</strong> Representa a entidade Aluno (com nome e e-mail). Cada aluno pertence a <strong>uma</strong> turma específica.</li>
+                </ul>
+
+                <h3>Como fazer no Draw.io:</h3>
+                <ol style="margin-left: 20px; margin-bottom: 1.5rem; color: var(--text-muted);">
+                    <li style="margin-bottom: 6px;">Acesse <a href="https://app.diagrams.net/" target="_blank" style="color: var(--senac-orange);">app.diagrams.net</a> e crie um novo diagrama em branco.</li>
+                    <li style="margin-bottom: 6px;">Na barra lateral esquerda, clique em <strong>+ Mais Formas</strong>, marque a opção <strong>Relação de Entidades (Entity Relation)</strong> e clique em Aplicar.</li>
+                    <li style="margin-bottom: 6px;">Arraste duas caixas de tabela (Entidades) para a tela e dê os nomes de <code>turma</code> e <code>aluno</code>.</li>
+                    <li style="margin-bottom: 6px;">Adicione os atributos (campos), marcando as Chaves Primárias (<strong>PK</strong>) e a Chave Estrangeira (<strong>FK</strong>).</li>
+                    <li style="margin-bottom: 6px;">Conecte as duas tabelas com uma linha de relacionamento de <strong>1 para N (1:N)</strong> (onde 1 turma possui N alunos).</li>
+                </ol>
+
+                <h3>Visualização do Diagrama de Referência</h3>
+                <p>O seu diagrama no draw.io deve ficar parecido com o modelo lógico a seguir:</p>
+                
+                <div class="db-schema-visual">
+                    <div class="visual-table">
+                        <div class="visual-table-header header-turma">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                            turma
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name pk-col"><strong>PK</strong> id_turma</span>
+                            <span class="col-meta">INT (PK)</span>
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name">nome_turma</span>
+                            <span class="col-meta">VARCHAR(50)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="schema-relation-line">
+                        <span>1 : N</span>
+                    </div>
+                    
+                    <div class="visual-table">
+                        <div class="visual-table-header header-aluno">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            aluno
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name pk-col"><strong>PK</strong> id_aluno</span>
+                            <span class="col-meta">INT (PK)</span>
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name">nome</span>
+                            <span class="col-meta">VARCHAR(100)</span>
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name">email</span>
+                            <span class="col-meta">VARCHAR(100)</span>
+                        </div>
+                        <div class="visual-table-row">
+                            <span class="col-name fk-col"><strong>FK</strong> id_turma</span>
+                            <span class="col-meta">INT (FK)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert-box alert-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <div class="alert-content">
+                        <strong>O que são PK e FK?</strong>
+                        - <strong>Primary Key (PK):</strong> O código identificador único de cada registro (não se repete).
+                        - <strong>Foreign Key (FK):</strong> A ligação que diz a qual turma aquele aluno pertence. Garante a integridade referencial dos dados.
+                    </div>
+                </div>
+
+                <h3>Vídeo Sugerido</h3>
+                <div class="video-grid">
+                    <a href="https://www.youtube.com/watch?v=zIpccqWeZN0" target="_blank" class="video-card">
+                        <div class="video-thumbnail-placeholder">▶</div>
+                        <div class="video-info">
+                            <div class="video-title">Criação do Design do Banco de Dados exemplo usando Draw.io</div>
+                            <div class="video-duration">Duração: 23 minutos</div>
+                        </div>
+                    </a>
+                </div>
+
+                <h3>Sua Tarefa para este passo:</h3>
+                <div class="task-list">
+                    <div class="task-item" data-task="task-model-1">
+                        <input type="checkbox" class="task-checkbox" id="task-model-1">
+                        <label class="task-label" for="task-model-1">Criei a estrutura das tabelas 'turma' e 'aluno' e o relacionamento de 1 para N entre elas usando a ferramenta draw.io.</label>
+                    </div>
+                    <div class="task-item" data-task="task-model-2">
+                        <input type="checkbox" class="task-checkbox" id="task-model-2">
+                        <label class="task-label" for="task-model-2">Identifiquei e configurei corretamente as chaves primárias (id_turma e id_aluno) e a chave estrangeira (id_turma em aluno) no draw.io.</label>
+                    </div>
+                </div>
+
+                <!-- Print Upload -->
+                <div class="upload-section">
+                    <div class="aside-title">Evidência do Indicador 1</div>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Tire um print da sua modelagem feita no draw.io e faça o upload abaixo:</p>
+                    <label class="upload-btn">
+                        Escolher Print do Draw.io
+                        <input type="file" class="upload-input" id="img-input-1" accept="image/*">
+                    </label>
+                    <span class="upload-status" id="upload-status-1">Nenhum arquivo enviado</span>
+                    <img id="preview-1" class="upload-preview" alt="Preview Diagrama Draw.io">
+                </div>
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="welcome">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Início
+                    </button>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="step2">
+                        Passo 2: Servidor Uniserver
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Step 2 (Ambiente) -->
+            <div class="content-card" id="tab-step2">
+                <div class="card-header">
+                    <span class="step-number">Passo 2</span>
+                    <h2 class="card-title">Preparação do Servidor (Uniform Server)</h2>
+                    <div class="indicator-mapping">
+                        <span class="indicator-tag tag-orange">Foca no Indicador 2</span>
+                    </div>
+                    <div class="tag-indicator-alert">
+                        Ao concluir estas tarefas e anexar o print, você estará <strong>concluindo o Indicador 2</strong>!
+                    </div>
+                </div>
+                <p>Para rodar nossa aplicação PHP e o banco de dados MySQL localmente de forma estável, utilizaremos o <strong>Uniform Server (UniServer)</strong>. Ele é muito mais leve e portátil que o XAMPP.</p>
+                
+                <h3>Passo a Passo de Configuração:</h3>
+                <ol style="margin-left: 20px; margin-bottom: 1.5rem; color: var(--text-muted);">
+                    <li style="margin-bottom: 8px;">Baixe o Uniform Server Zero (versão portátil) no SourceForge: <a href="https://sourceforge.net/projects/miniserver/files/Uniform%20Server/" target="_blank" style="color: var(--senac-orange);">Download UniServer</a>.</li>
+                    <li style="margin-bottom: 8px;">Ele virá em um arquivo compactado (ou auto-extraível). Extraia o conteúdo diretamente no seu disco principal, por exemplo em: <code>C:\UniServerZ</code>.</li>
+                    <li style="margin-bottom: 8px;">Abra a pasta <code>C:\UniServerZ</code> e dê dois cliques no arquivo executável <strong><code>Start.exe</code></strong>.</li>
+                    <li style="margin-bottom: 8px;">No painel gráfico que abrir, clique nos botões <strong>Start Apache</strong> e <strong>Start MySQL</strong> para iniciar os servidores locais.</li>
+                    <li style="margin-bottom: 8px;">(Opcional) O UniServer solicitará que você defina uma nova senha para o MySQL no primeiro acesso. Para facilitar nosso projeto local, você pode definir como vazia (apenas dê enter/confirme) ou usar a senha padrão.</li>
+                </ol>
+
+                <div class="alert-box alert-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <div class="alert-content">
+                        <strong>Onde colocar os arquivos PHP?</strong>
+                        No Uniform Server, a pasta padrão do servidor de arquivos web é a <strong><code>www</code></strong> (e não <em>htdocs</em> como no XAMPP). Logo, seus arquivos devem ficar dentro de <code>C:\UniServerZ\www\</code>.
+                    </div>
+                </div>
+
+                <h3>Vídeo Tutorial Sugerido:</h3>
+                <div class="video-grid">
+                    <a href="https://www.youtube.com/watch?v=PlYcSL2hjwA" target="_blank" class="video-card">
+                        <div class="video-thumbnail-placeholder">▶</div>
+                        <div class="video-info">
+                            <div class="video-title">Como instalar MySQL no Windows com Uniform Server Zero</div>
+                            <div class="video-duration">Bóson Treinamentos</div>
+                        </div>
+                    </a>
+                </div>
+
+                <h3>Sua Tarefa para este passo:</h3>
+                <div class="task-list">
+                    <div class="task-item" data-task="task-env-1">
+                        <input type="checkbox" class="task-checkbox" id="task-env-1">
+                        <label class="task-label" for="task-env-1">Baixei e descompactei o Uniform Server (UniServerZ).</label>
+                    </div>
+                    <div class="task-item" data-task="task-env-2">
+                        <input type="checkbox" class="task-checkbox" id="task-env-2">
+                        <label class="task-label" for="task-env-2">Abri o 'Start.exe' e ativei com sucesso o 'Apache' e o 'MySQL' no painel gráfico do UniServer.</label>
+                    </div>
+                    <div class="task-item" data-task="task-env-3">
+                        <input type="checkbox" class="task-checkbox" id="task-env-3">
+                        <label class="task-label" for="task-env-3">Acessei o painel do phpMyAdmin através do painel do UniServer.</label>
+                    </div>
+                </div>
+
+                <!-- Print Upload -->
+                <div class="upload-section">
+                    <div class="aside-title">Evidência do Indicador 2</div>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Tire um print da tela do seu Uniform Server (Start.exe) mostrando os serviços ativos e anexe aqui:</p>
+                    <label class="upload-btn">
+                        Escolher Print do Servidor Ativo
+                        <input type="file" class="upload-input" id="img-input-2" accept="image/*">
+                    </label>
+                    <span class="upload-status" id="upload-status-2">Nenhum arquivo enviado</span>
+                    <img id="preview-2" class="upload-preview" alt="Preview UniServer">
+                </div>
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="step1">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Passo 1
+                    </button>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="step3">
+                        Passo 3: Criar Banco no phpMyAdmin
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Step 3 (SQL Físico) -->
+            <div class="content-card" id="tab-step3">
+                <div class="card-header">
+                    <span class="step-number">Passo 3</span>
+                    <h2 class="card-title">Criação do Banco de Dados Físico (SQL)</h2>
+                    <div class="indicator-mapping">
+                        <span class="indicator-tag tag-orange">Foca no Indicador 3</span>
+                    </div>
+                    <div class="tag-indicator-alert">
+                        Ao concluir estas tarefas e anexar o print, você estará <strong>concluindo o Indicador 3</strong>!
+                    </div>
+                </div>
+                <p>Com o MySQL rodando no UniServer, vamos criar a estrutura do banco físico usando a aba <strong>SQL</strong> do <strong>phpMyAdmin</strong>.</p>
+                
+                <h3>Como fazer no phpMyAdmin do UniServer:</h3>
+                <ol style="margin-left: 20px; margin-bottom: 1.5rem; color: var(--text-muted);">
+                    <li style="margin-bottom: 6px;">No menu do UniServer (ou digitando no navegador <code>http://localhost/phpmyadmin/</code>), abra a interface do phpMyAdmin.</li>
+                    <li style="margin-bottom: 6px;">Clique na aba superior chamada <strong>SQL</strong>.</li>
+                    <li style="margin-bottom: 6px;">Copie o código SQL fornecido abaixo, cole no editor do phpMyAdmin e clique em <strong>Executar</strong>.</li>
+                </ol>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-lang">SQL Script</span>
+                        <button class="btn-copy" data-target="sql-code">Copiar</button>
+                    </div>
+                    <pre><code id="sql-code"><span class="code-comment">-- 1. Criar o banco de dados</span>
+<span class="code-keyword">CREATE DATABASE IF NOT EXISTS</span> db_escola 
+<span class="code-keyword">CHARACTER SET</span> utf8mb4 
+<span class="code-keyword">COLLATE</span> utf8mb4_unicode_ci;
+
+<span class="code-keyword">USE</span> db_escola;
+
+<span class="code-comment">-- 2. Criar tabela de Turmas (DDL)</span>
+<span class="code-keyword">CREATE TABLE IF NOT EXISTS</span> turma (
+    id_turma <span class="code-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    nome_turma <span class="code-type">VARCHAR(50) NOT NULL</span>
+);
+
+<span class="code-comment">-- 3. Criar tabela de Alunos (DDL com Chave Estrangeira)</span>
+<span class="code-keyword">CREATE TABLE IF NOT EXISTS</span> aluno (
+    id_aluno <span class="code-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    nome <span class="code-type">VARCHAR(100) NOT NULL</span>,
+    email <span class="code-type">VARCHAR(100) NOT NULL</span>,
+    id_turma <span class="code-type">INT NOT NULL</span>,
+    <span class="code-keyword">FOREIGN KEY</span> (id_turma) <span class="code-keyword">REFERENCES</span> turma(id_turma) 
+        <span class="code-keyword">ON DELETE RESTRICT</span>
+);
+
+<span class="code-comment">-- 4. Inserir dados de teste (DML)</span>
+<span class="code-keyword">INSERT INTO</span> turma (nome_turma) <span class="code-keyword">VALUES 
+</span>(<span class="code-string">'Informática para Internet'</span>),
+(<span class="code-string">'Desenvolvimento de Sistemas'</span>);
+
+<span class="code-keyword">INSERT INTO</span> aluno (nome, email, id_turma) <span class="code-keyword">VALUES</span>
+(<span class="code-string">'Ana Silva'</span>, <span class="code-string">'ana@email.com'</span>, 1),
+(<span class="code-string">'Bruno Souza'</span>, <span class="code-string">'bruno@email.com'</span>, 2),
+(<span class="code-string">'Raquele Lima'</span>, <span class="code-string">'raquele@email.com'</span>, 1);</code></pre>
+                </div>
+
+                <h3>Sua Tarefa para este passo:</h3>
+                <div class="task-list">
+                    <div class="task-item" data-task="task-sql-1">
+                        <input type="checkbox" class="task-checkbox" id="task-sql-1">
+                        <label class="task-label" for="task-sql-1">Colei o script SQL no phpMyAdmin e executei.</label>
+                    </div>
+                    <div class="task-item" data-task="task-sql-2">
+                        <input type="checkbox" class="task-checkbox" id="task-sql-2">
+                        <label class="task-label" for="task-sql-2">Verifiquei que o banco 'db_escola' e as tabelas 'turma' e 'aluno' aparecem na barra esquerda.</label>
+                    </div>
+                    <div class="task-item" data-task="task-sql-3">
+                        <input type="checkbox" class="task-checkbox" id="task-sql-3">
+                        <label class="task-label" for="task-sql-3">Cliquei na tabela 'aluno' para ver que os dados iniciais foram gravados corretamente.</label>
+                    </div>
+                </div>
+
+                <!-- Print Upload -->
+                <div class="upload-section">
+                    <div class="aside-title">Evidência do Indicador 3</div>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Tire um print da tela do phpMyAdmin mostrando as tabelas criadas no banco 'db_escola' e anexe aqui:</p>
+                    <label class="upload-btn">
+                        Escolher Print do Banco no phpMyAdmin
+                        <input type="file" class="upload-input" id="img-input-3" accept="image/*">
+                    </label>
+                    <span class="upload-status" id="upload-status-3">Nenhum arquivo enviado</span>
+                    <img id="preview-3" class="upload-preview" alt="Preview phpMyAdmin">
+                </div>
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="step2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Passo 2
+                    </button>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="step4">
+                        Passo 4: Integrar com PHP
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Step 4 (Conexão) -->
+            <div class="content-card" id="tab-step4">
+                <div class="card-header">
+                    <span class="step-number">Passo 4</span>
+                    <h2 class="card-title">Integração do PHP com Banco de Dados</h2>
+                    <div class="indicator-mapping">
+                        <span class="indicator-tag tag-orange">Foca no Indicador 4</span>
+                    </div>
+                    <div class="tag-indicator-alert">
+                        Ao concluir estas tarefas e anexar o print, você estará <strong>concluindo o Indicador 4</strong>!
+                    </div>
+                </div>
+                <p>Com o banco físico criado, faremos a conexão do código da nossa aplicação PHP usando a classe <strong>PDO</strong>.</p>
+                
+                <h3>Criando a pasta do Projeto:</h3>
+                <p>Navegue até a pasta de arquivos do seu UniServer (<code>C:\UniServerZ\www</code>). Crie uma pasta chamada <strong><code>recuperacao_escola</code></strong> dentro dela. Coloque o código de conexão abaixo em um arquivo chamado <strong><code>conexao.php</code></strong> nessa pasta:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-lang">conexao.php</span>
+                        <button class="btn-copy" data-target="php-connection">Copiar</button>
+                    </div>
+                    <pre><code id="php-connection"><span class="code-keyword">&lt;?php</span>
+$host = <span class="code-string">'localhost'</span>;
+$dbname = <span class="code-string">'db_escola'</span>;
+$username = <span class="code-string">'root'</span>;
+$password = <span class="code-string">''</span>; 
+
+<span class="code-keyword">try</span> {
+    $pdo = <span class="code-keyword">new</span> <span class="code-type">PDO</span>(<span class="code-string">"mysql:host=$host;dbname=$dbname;charset=utf8"</span>, $username, $password);
+    $pdo-&gt;<span class="code-function">setAttribute</span>(<span class="code-type">PDO</span>::ATTR_ERRMODE, <span class="code-type">PDO</span>::ERRMODE_EXCEPTION);
+} <span class="code-keyword">catch</span> (<span class="code-type">PDOException</span> $e) {
+    <span class="code-keyword">die</span>(<span class="code-string">"Erro ao conectar com o banco de dados: "</span> . $e-&gt;<span class="code-function">getMessage</span>());
+}
+<span class="code-keyword">?&gt;</span></code></pre>
+                </div>
+
+                <h3>Sua Tarefa para este passo:</h3>
+                <div class="task-list">
+                    <div class="task-item" data-task="task-conn-1">
+                        <input type="checkbox" class="task-checkbox" id="task-conn-1">
+                        <label class="task-label" for="task-conn-1">Criei a pasta 'recuperacao_escola' em 'C:\UniServerZ\www'.</label>
+                    </div>
+                    <div class="task-item" data-task="task-conn-2">
+                        <input type="checkbox" class="task-checkbox" id="task-conn-2">
+                        <label class="task-label" for="task-conn-2">Criei o arquivo 'conexao.php' e salvei o código PDO nele.</label>
+                    </div>
+                </div>
+
+                <!-- Print Upload -->
+                <div class="upload-section">
+                    <div class="aside-title">Evidência do Indicador 4</div>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Tire um print do código do seu arquivo <code>conexao.php</code> no seu editor de código (VS Code, etc.) e envie:</p>
+                    <label class="upload-btn">
+                        Escolher Print do Código conexao.php
+                        <input type="file" class="upload-input" id="img-input-4" accept="image/*">
+                    </label>
+                    <span class="upload-status" id="upload-status-4">Nenhum arquivo enviado</span>
+                    <img id="preview-4" class="upload-preview" alt="Preview conexao.php">
+                </div>
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="step3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Passo 3
+                    </button>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="step5">
+                        Passo 5: Criar Páginas do CRUD
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Step 5 (CRUD PHP) -->
+            <div class="content-card" id="tab-step5">
+                <div class="card-header">
+                    <span class="step-number">Passo 5</span>
+                    <h2 class="card-title">Manipulação de Dados a partir da Aplicação (CRUD)</h2>
+                    <div class="indicator-mapping">
+                        <span class="indicator-tag tag-orange">Foca no Indicador 5</span>
+                    </div>
+                    <div class="tag-indicator-alert">
+                        Ao concluir estas tarefas e anexar o print, você estará <strong>concluindo o Indicador 5</strong>!
+                    </div>
+                </div>
+                <p>Nesta última etapa do projeto, criaremos as duas páginas principais da aplicação para <strong>inserir e ler dados</strong> do banco:</p>
+                <ul>
+                    <li><strong>Listagem (<code>index.php</code>):</strong> Fará uma consulta SQL com a cláusula <strong><code>INNER JOIN</code></strong> para trazer os dados do aluno junto com o nome correspondente da sua turma.</li>
+                    <li><strong>Cadastro (<code>cadastrar.php</code>):</strong> Contém um formulário para inserir alunos de forma segura via POST utilizando Prepared Statements.</li>
+                </ul>
+
+                <h3>1. Arquivo de Listagem: <code>index.php</code></h3>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-lang">index.php</span>
+                        <button class="btn-copy" data-target="php-index">Copiar</button>
+                    </div>
+                    <pre><code id="php-index"><span class="code-keyword">&lt;?php</span>
+<span class="code-keyword">require</span> <span class="code-string">'conexao.php'</span>;
+
+$sql = <span class="code-string">"SELECT aluno.id_aluno, aluno.nome, aluno.email, turma.nome_turma 
+        FROM aluno 
+        INNER JOIN turma ON aluno.id_turma = turma.id_turma"</span>;
+
+$stmt = $pdo-&gt;<span class="code-function">query</span>($sql);
+$alunos = $stmt-&gt;<span class="code-function">fetchAll</span>(<span class="code-type">PDO</span>::FETCH_ASSOC);
+<span class="code-keyword">?&gt;</span>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Lista de Alunos&lt;/title&gt;
+    &lt;link rel="stylesheet" href="estilo.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="container"&gt;
+        &lt;h2&gt;Alunos Cadastrados&lt;/h2&gt;
+        &lt;a href="cadastrar.php" class="btn"&gt;Cadastrar Novo Aluno&lt;/a&gt;
+        
+        &lt;table border="1" style="width:100%; border-collapse: collapse; margin-top:20px;"&gt;
+            &lt;tr&gt;
+                &lt;th&gt;ID&lt;/th&gt;
+                &lt;th&gt;Nome&lt;/th&gt;
+                &lt;th&gt;E-mail&lt;/th&gt;
+                &lt;th&gt;Turma&lt;/th&gt;
+            &lt;/tr&gt;
+            <span class="code-keyword">&lt;?php</span> <span class="code-keyword">foreach</span> ($alunos <span class="code-keyword">as</span> $aluno): <span class="code-keyword">?&gt;</span>
+            &lt;tr&gt;
+                &lt;td&gt;<span class="code-keyword">&lt;?=</span> $aluno[<span class="code-string">'id_aluno'</span>] <span class="code-keyword">?&gt;</span>&lt;/td&gt;
+                &lt;td&gt;<span class="code-keyword">&lt;?=</span> htmlspecialchars($aluno[<span class="code-string">'nome'</span>]) <span class="code-keyword">?&gt;</span>&lt;/td&gt;
+                &lt;td&gt;<span class="code-keyword">&lt;?=</span> htmlspecialchars($aluno[<span class="code-string">'email'</span>]) <span class="code-keyword">?&gt;</span>&lt;/td&gt;
+                &lt;td&gt;&lt;strong&gt;<span class="code-keyword">&lt;?=</span> htmlspecialchars($aluno[<span class="code-string">'nome_turma'</span>]) <span class="code-keyword">?&gt;</span>&lt;/strong&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+            <span class="code-keyword">&lt;?php</span> <span class="code-keyword">endforeach</span>; <span class="code-keyword">?&gt;</span>
+        &lt;/table&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h3>2. Arquivo de Cadastro: <code>cadastrar.php</code></h3>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-lang">cadastrar.php</span>
+                        <button class="btn-copy" data-target="php-cadastrar">Copiar</button>
+                    </div>
+                    <pre><code id="php-cadastrar"><span class="code-keyword">&lt;?php</span>
+<span class="code-keyword">require</span> <span class="code-string">'conexao.php'</span>;
+
+$turmas = $pdo-&gt;<span class="code-function">query</span>(<span class="code-string">"SELECT * FROM turma"</span>)-&gt;<span class="code-function">fetchAll</span>(<span class="code-type">PDO</span>::FETCH_ASSOC);
+
+<span class="code-comment">// Inserção de dados de forma segura</span>
+<span class="code-keyword">if</span> ($_SERVER[<span class="code-string">'REQUEST_METHOD'</span>] === <span class="code-string">'POST'</span>) {
+    $nome = $_POST[<span class="code-string">'nome'</span>] ?? <span class="code-string">''</span>;
+    $email = $_POST[<span class="code-string">'email'</span>] ?? <span class="code-string">''</span>;
+    $id_turma = $_POST[<span class="code-string">'id_turma'</span>] ?? <span class="code-string">''</span>;
+
+    <span class="code-keyword">if</span> (!<span class="code-keyword">empty</span>($nome) &amp;&amp; !<span class="code-keyword">empty</span>($email) &amp;&amp; !<span class="code-keyword">empty</span>($id_turma)) {
+        $stmt = $pdo-&gt;<span class="code-function">prepare</span>(<span class="code-string">"INSERT INTO aluno (nome, email, id_turma) VALUES (:nome, :email, :id_turma)"</span>);
+        $stmt-&gt;<span class="code-function">execute</span>([
+            <span class="code-string">':nome'</span> =&gt; $nome,
+            <span class="code-string">':email'</span> =&gt; $email,
+            <span class="code-string">':id_turma'</span> =&gt; $id_turma
+        ]);
+        <span class="code-function">header</span>(<span class="code-string">"Location: index.php"</span>);
+        <span class="code-keyword">exit</span>;
+    }
+}
+<span class="code-keyword">?&gt;</span>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Cadastrar Aluno&lt;/title&gt;
+    &lt;link rel="stylesheet" href="estilo.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="container"&gt;
+        &lt;h2&gt;Cadastrar Novo Aluno&lt;/h2&gt;
+        &lt;form action="cadastrar.php" method="POST"&gt;
+            &lt;p&gt;Nome: &lt;input type="text" name="nome" required&gt;&lt;/p&gt;
+            &lt;p&gt;E-mail: &lt;input type="email" name="email" required&gt;&lt;/p&gt;
+            &lt;p&gt;Turma: 
+                &lt;select name="id_turma" required&gt;
+                    &lt;option value=""&gt;Selecione&lt;/option&gt;
+                    <span class="code-keyword">&lt;?php</span> <span class="code-keyword">foreach</span> ($turmas <span class="code-keyword">as</span> $turma): <span class="code-keyword">?&gt;</span>
+                        &lt;option value="<span class="code-keyword">&lt;?=</span> $turma[<span class="code-string">'id_turma'</span>] <span class="code-keyword">?&gt;</span>"&gt;<span class="code-keyword">&lt;?=</span> htmlspecialchars($turma[<span class="code-string">'nome_turma'</span>]) <span class="code-keyword">?&gt;</span>&lt;/option&gt;
+                    <span class="code-keyword">&lt;?php</span> <span class="code-keyword">endforeach</span>; <span class="code-keyword">?&gt;</span>
+                &lt;/select&gt;
+            &lt;/p&gt;
+            &lt;button type="submit"&gt;Salvar Aluno&lt;/button&gt;
+            &lt;a href="index.php"&gt;Voltar&lt;/a&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <h3>Sua Tarefa para este passo:</h3>
+                <div class="task-list">
+                    <div class="task-item" data-task="task-crud-1">
+                        <input type="checkbox" class="task-checkbox" id="task-crud-1">
+                        <label class="task-label" for="task-crud-1">Criei os arquivos 'index.php' e 'cadastrar.php' na pasta do projeto.</label>
+                    </div>
+                    <div class="task-item" data-task="task-crud-2">
+                        <input type="checkbox" class="task-checkbox" id="task-crud-2">
+                        <label class="task-label" for="task-crud-2">Abri o navegador em 'http://localhost/recuperacao_escola/index.php' e vi os registros na tabela.</label>
+                    </div>
+                    <div class="task-item" data-task="task-crud-3">
+                        <input type="checkbox" class="task-checkbox" id="task-crud-3">
+                        <label class="task-label" for="task-crud-3">Cadastrei um novo aluno e vi o nome aparecer atualizado na listagem da tabela.</label>
+                    </div>
+                </div>
+
+                <!-- Print Upload -->
+                <div class="upload-section">
+                    <div class="aside-title">Evidência do Indicador 5</div>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Tire um print da página 'index.php' rodando no navegador contendo o novo aluno cadastrado por você:</p>
+                    <label class="upload-btn">
+                        Escolher Print do CRUD no Navegador
+                        <input type="file" class="upload-input" id="img-input-5" accept="image/*">
+                    </label>
+                    <span class="upload-status" id="upload-status-5">Nenhum arquivo enviado</span>
+                    <img id="preview-5" class="upload-preview" alt="Preview do CRUD no Navegador">
+                </div>
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="step4">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Passo 4
+                    </button>
+                    <button class="btn-step btn-step-primary next-tab-btn" data-next="delivery">
+                        Gerar Relatório de Entrega
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Delivery -->
+            <div class="content-card" id="tab-delivery">
+                <div class="card-header">
+                    <span class="step-number">Finalização</span>
+                    <h2 class="card-title">Envio e Emissão de Relatório</h2>
+                </div>
+                <p>Para simplificar sua entrega, implementamos um gerador de relatório integrado. Ao clicar no botão abaixo, a página compilará o seu progresso e os prints enviados em um documento limpo e pronto para salvar em PDF.</p>
+                
+                <div class="alert-box alert-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <div class="alert-content">
+                        <strong>Como salvar o PDF?</strong>
+                        Ao clicar em "Gerar Documento de Entrega", o documento abrirá e a tela de impressão do sistema aparecerá. Selecione como destino a opção <strong>"Salvar como PDF"</strong>. Você poderá enviar esse PDF diretamente na sua plataforma virtual do Senac!
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 2rem 0;">
+                    <button class="btn-step btn-step-primary" id="btn-print-report" style="padding: 15px 30px; font-size: 1.1rem; margin: 0 auto;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Gerar Documento de Entrega (PDF)
+                    </button>
+                </div>
+
+
+
+                <div class="stepper-nav">
+                    <button class="btn-step prev-tab-btn" data-prev="step5">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Passo 5
+                    </button>
+                    <div></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Printable Report (lives outside all tabs so @media print can target it alone) -->
+    <div id="report-print-root" style="display:none;">
+        <div class="report-preview-container" id="report-preview" style="background:#fff; color:#1e293b; padding:2.5rem; font-family: Arial, sans-serif;">
+            <div style="border-bottom: 2px solid #004587; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="color: #004587; font-size: 20pt; font-weight: 800; margin: 0;">SENAC SÃO PAULO</h1>
+                    <p style="font-size: 10pt; color: #555; margin: 2px 0 0 0;">Curso Técnico em Informática para Internet</p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="background: #f29111; color: white; padding: 4px 10px; border-radius: 4px; font-size: 10pt; font-weight: 700;">RECUPERAÇÃO</span>
+                </div>
+            </div>
+
+            <h2 style="font-size: 16pt; font-weight: 700; margin-bottom: 15px; color: #333;">Relatório de Evidências - UC8: Banco de Dados para Web</h2>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10pt;">
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9; width: 120px;">Estudante:</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">Raquele Lima</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9; width: 120px;">Data:</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;" id="print-date">02/07/2026</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9;">Docentes:</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">Tainá e André</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9;">Carga Horária:</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">84 Horas (21 Aulas)</td>
+                </tr>
+            </table>
+
+            <h3 style="font-size: 12pt; border-left: 3px solid #f29111; padding-left: 8px; margin-top: 15px; margin-bottom: 10px; color: #004587;">Comprovação dos Indicadores da Unidade Curricular</h3>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 9.5pt;">
+                <thead>
+                    <tr style="background: #004587; color: white;">
+                        <th style="padding: 8px; text-align: left; border: 1px solid #004587;">Indicador</th>
+                        <th style="padding: 8px; text-align: left; border: 1px solid #004587;">Etapa Vinculada</th>
+                        <th style="padding: 8px; text-align: center; border: 1px solid #004587; width: 120px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>I1</strong>: Modela a estrutura do Banco de Dados conforme requisitos.</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Passo 1: Diagrama Lógico Relacional</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #10b981; font-weight: bold;" id="print-status-1">CONCLUÍDO</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>I2</strong>: Prepara o ambiente de desenvolvimento local (SGBD).</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Passo 2: Uniform Server Configurado</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #10b981; font-weight: bold;" id="print-status-2">CONCLUÍDO</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>I3</strong>: Estrutura banco de dados físico utilizando DDL e DML.</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Passo 3: Execução de Script SQL</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #10b981; font-weight: bold;" id="print-status-3">CONCLUÍDO</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>I4</strong>: Integra banco de dados à aplicação web através do PHP.</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Passo 4: Arquivo conexao.php (PDO)</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #10b981; font-weight: bold;" id="print-status-4">CONCLUÍDO</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>I5</strong>: Manipula dados a partir da aplicação no PHP.</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Passo 5: Operações do CRUD no Navegador</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #10b981; font-weight: bold;" id="print-status-5">CONCLUÍDO</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="print-page-break"></div>
+
+            <h3 style="font-size: 12pt; border-left: 3px solid #f29111; padding-left: 8px; margin-bottom: 15px; color: #004587;">Anexo de Evidências (Prints do Projeto)</h3>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="font-size: 10pt; color: #555; margin-bottom: 5px;">Evidência 1: Modelagem e Relação Lógica (Indicador 1)</h4>
+                <img id="print-img-1" class="print-screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" src="" alt="Print Diagrama não inserido">
+            </div>
+            <div style="margin-bottom: 25px; page-break-before: always;">
+                <h4 style="font-size: 10pt; color: #555; margin-bottom: 5px;">Evidência 2: Uniform Server Rodando Apache/MySQL (Indicador 2)</h4>
+                <img id="print-img-2" class="print-screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" src="" alt="Print UniServer não inserido">
+            </div>
+            <div style="margin-bottom: 25px; page-break-before: always;">
+                <h4 style="font-size: 10pt; color: #555; margin-bottom: 5px;">Evidência 3: Tabelas Criadas no phpMyAdmin (Indicador 3)</h4>
+                <img id="print-img-3" class="print-screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" src="" alt="Print phpMyAdmin não inserido">
+            </div>
+            <div style="margin-bottom: 25px; page-break-before: always;">
+                <h4 style="font-size: 10pt; color: #555; margin-bottom: 5px;">Evidência 4: Código conexao.php no Editor (Indicador 4)</h4>
+                <img id="print-img-4" class="print-screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" src="" alt="Print conexao.php não inserido">
+            </div>
+            <div style="margin-bottom: 25px; page-break-before: always;">
+                <h4 style="font-size: 10pt; color: #555; margin-bottom: 5px;">Evidência 5: Listagem do CRUD rodando no Navegador (Indicador 5)</h4>
+                <img id="print-img-5" class="print-screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" src="" alt="Print CRUD não inserido">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Desenvolvido para a aluna <strong>Raquele</strong> pelos docentes <span>Tainá e André</span> &mdash; Informática para Internet &bull; Senac Pindamonhangaba.
+    </footer>
+
+    <script>
+        // Tab switching logic
+        const navItems = document.querySelectorAll('.nav-list .nav-item');
+        const contentCards = document.querySelectorAll('main .content-card');
+
+        function switchTab(tabId) {
+            navItems.forEach(item => {
+                if (item.getAttribute('data-tab') === tabId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            contentCards.forEach(card => {
+                if (card.id === `tab-${tabId}`) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+            
+            // Special handling for delivery tab to load report preview
+            if (tabId === 'delivery') {
+                document.getElementById('report-preview').classList.add('active');
+            } else {
+                document.getElementById('report-preview').classList.remove('active');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                switchTab(item.getAttribute('data-tab'));
+            });
+        });
+
+        // Next/Prev Buttons
+        document.querySelectorAll('.next-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.getAttribute('data-next'));
+            });
+        });
+
+        document.querySelectorAll('.prev-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.getAttribute('data-prev'));
+            });
+        });
+
+        // Copy functionality
+        document.querySelectorAll('.btn-copy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const codeElement = document.getElementById(targetId);
+                
+                // Get clean text replacing HTML tags
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = codeElement.innerText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+
+                btn.innerText = 'Copiado!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerText = 'Copiar';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // Screenshot upload and preview handling
+        const imageInputs = [1, 2, 3, 4, 5];
+        imageInputs.forEach(num => {
+            const fileInput = document.getElementById(`img-input-${num}`);
+            const statusText = document.getElementById(`upload-status-${num}`);
+            const previewImg = document.getElementById(`preview-${num}`);
+            const printImg = document.getElementById(`print-img-${num}`);
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const base64Data = event.target.result;
+                        previewImg.src = base64Data;
+                        previewImg.classList.add('active');
+                        
+                        // Set image in printable report
+                        printImg.src = base64Data;
+
+                        statusText.innerText = "✓ Enviado com sucesso!";
+                        statusText.className = "upload-status success";
+
+                        // Save image base64 locally in session
+                        sessionStorage.setItem(`screenshot-${num}`, base64Data);
+                        
+                        // Recalculate indicators
+                        updateProgress();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Restore from session if exists
+            const savedImg = sessionStorage.getItem(`screenshot-${num}`);
+            if (savedImg) {
+                previewImg.src = savedImg;
+                previewImg.classList.add('active');
+                printImg.src = savedImg;
+                statusText.innerText = "✓ Enviado com sucesso!";
+                statusText.className = "upload-status success";
+            }
+        });
+
+        // Set Print Date
+        const dateObj = new Date();
+        const formattedDate = String(dateObj.getDate()).padStart(2, '0') + '/' + String(dateObj.getMonth() + 1).padStart(2, '0') + '/' + dateObj.getFullYear();
+        // IDs are now in #report-print-root (outside all tabs)
+        const printDateEl = document.getElementById('print-date');
+        if (printDateEl) printDateEl.innerText = formattedDate;
+
+        // Print Report Action button
+        document.getElementById('btn-print-report').addEventListener('click', () => {
+            // Check if all screenshots were uploaded first
+            let allUploaded = true;
+            for (let i = 1; i <= 5; i++) {
+                if (!sessionStorage.getItem(`screenshot-${i}`)) {
+                    allUploaded = false;
+                }
+            }
+
+            if (!allUploaded) {
+                if (!confirm("Atenção Raquele: você ainda não carregou todos os 5 prints de evidência. Deseja imprimir o relatório mesmo assim?")) {
+                    return;
+                }
+            }
+
+            // Sync statuses and images into the outer print container
+            for (let i = 1; i <= 5; i++) {
+                const saved = sessionStorage.getItem(`screenshot-${i}`);
+                const statusLabel = document.getElementById(`print-status-${i}`);
+                const printImg    = document.getElementById(`print-img-${i}`);
+                if (statusLabel) {
+                    statusLabel.innerText    = saved ? 'CONCLUÍDO' : 'PENDENTE';
+                    statusLabel.style.color  = saved ? '#10b981'   : '#ef4444';
+                }
+                if (printImg && saved) printImg.src = saved;
+            }
+
+            // #report-print-root is shown exclusively by @media print — just call print()
+            window.print();
+        });
+
+        // Checklist, Progress Bar & Indicator logic
+        const tasks = [
+            { id: 'task-model-1', step: 1 },
+            { id: 'task-model-2', step: 1 },
+            { id: 'task-env-1', step: 2 },
+            { id: 'task-env-2', step: 2 },
+            { id: 'task-env-3', step: 2 },
+            { id: 'task-sql-1', step: 3 },
+            { id: 'task-sql-2', step: 3 },
+            { id: 'task-sql-3', step: 3 },
+            { id: 'task-conn-1', step: 4 },
+            { id: 'task-conn-2', step: 4 },
+            { id: 'task-crud-1', step: 5 },
+            { id: 'task-crud-2', step: 5 },
+            { id: 'task-crud-3', step: 5 }
+        ];
+
+        // Load saved state from localStorage
+        function loadState() {
+            tasks.forEach(task => {
+                const checked = localStorage.getItem(task.id) === 'true';
+                const el = document.getElementById(task.id);
+                if (el) {
+                    el.checked = checked;
+                    if (checked) {
+                        el.closest('.task-item').classList.add('checked');
+                    }
+                }
+            });
+            updateProgress();
+        }
+
+        // Save checked state
+        tasks.forEach(task => {
+            const el = document.getElementById(task.id);
+            if (el) {
+                el.closest('.task-item').addEventListener('click', (e) => {
+                    if (e.target !== el) {
+                        el.checked = !el.checked;
+                    }
+                    
+                    const checked = el.checked;
+                    localStorage.setItem(task.id, checked ? 'true' : 'false');
+                    
+                    if (checked) {
+                        el.closest('.task-item').classList.add('checked');
+                    } else {
+                        el.closest('.task-item').classList.remove('checked');
+                    }
+                    updateProgress();
+                });
+            }
+        });
+
+        // Calculate progress percentage and update visual status
+        function updateProgress() {
+            let completedCount = 0;
+            const stepCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            const stepTotals = { 1: 2, 2: 3, 3: 3, 4: 2, 5: 3 };
+
+            tasks.forEach(task => {
+                const el = document.getElementById(task.id);
+                if (el && el.checked) {
+                    completedCount++;
+                    stepCounts[task.step]++;
+                }
+            });
+
+            const totalTasks = tasks.length;
+            const pct = Math.round((completedCount / totalTasks) * 100);
+
+            // Update Progress Circle SVG stroke-dashoffset
+            const fillElement = document.getElementById('progressFill');
+            const offset = 408.4 - (408.4 * pct / 100);
+            fillElement.style.strokeDashoffset = offset;
+
+            // Update Text Percentages
+            document.getElementById('progressPct').innerText = `${pct}%`;
+
+            // Progress motivational text
+            const descEl = document.getElementById('progressText');
+            if (pct === 0) descEl.innerText = "Vamos começar, Raquele! Respeite seu tempo.";
+            else if (pct < 30) descEl.innerText = "Ótimo início! Um passo de cada vez.";
+            else if (pct < 70) descEl.innerText = "Muito bem, você já fez mais da metade!";
+            else if (pct < 100) descEl.innerText = "Falta muito pouco! Quase lá.";
+            else descEl.innerText = "Parabéns, Raquele! Tudo concluído com sucesso! 🎉";
+
+            // Update indicator badges & aside lists
+            for (let step = 1; step <= 5; step++) {
+                // An indicator is fully complete only if the step checklist is complete AND the screenshot is uploaded!
+                const checklistDone = stepCounts[step] === stepTotals[step];
+                const screenshotDone = sessionStorage.getItem(`screenshot-${step}`) !== null;
+                
+                const stepCompleted = checklistDone && screenshotDone;
+
+                const badgeEl = document.getElementById(`ind-status-${step}`);
+                const cardEl = document.getElementById(`ind-card-${step}`);
+                const navItemEl = document.getElementById(`nav-step${step}`);
+
+                if (stepCompleted) {
+                    badgeEl.innerText = "Concluído";
+                    badgeEl.className = "indicator-status-badge status-completed";
+                    cardEl.classList.add('completed');
+                    navItemEl.classList.add('completed');
+                } else {
+                    let pendingText = "Pendente";
+                    if (checklistDone && !screenshotDone) {
+                        pendingText = "Sem Print";
+                    }
+                    badgeEl.innerText = pendingText;
+                    badgeEl.className = "indicator-status-badge status-pending";
+                    cardEl.classList.remove('completed');
+                    navItemEl.classList.remove('completed');
+                }
+            }
+        }
+
+        // Initialize state on page load
+        window.addEventListener('load', loadState);
+    </script>
+</body>
+</html>
